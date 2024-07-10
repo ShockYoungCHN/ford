@@ -39,11 +39,11 @@ void Server::InitMem() {
   RDMA_LOG(INFO) << "Initialize memory success!";
 }
 
-void Server::InitRDMA() {
+void Server::InitRDMA(int dev_id, int port_id) {
   /************************************* RDMA+PM Initialization ***************************************/
   RDMA_LOG(INFO) << "Start initializing RDMA...";
   rdma_ctrl = std::make_shared<RdmaCtrl>(server_node_id, local_port);
-  RdmaCtrl::DevIdx idx{.dev_id = 2, .port_id = 1};  // using the first RNIC's first port
+  RdmaCtrl::DevIdx idx{.dev_id = dev_id, .port_id = port_id};   // using the first RNIC's first port
   rdma_ctrl->open_thread_local_device(idx);
   RDMA_ASSERT(
       rdma_ctrl->register_memory(SERVER_HASH_BUFF_ID, hash_buffer, hash_buf_size, rdma_ctrl->get_device()) == true);
@@ -287,6 +287,9 @@ int main(int argc, char* argv[]) {
   auto compute_node_ips = compute_nodes.get("compute_node_ips");  // Array
   size_t compute_node_num = compute_node_ips.size();
 
+  int dev_id = (int)local_node.get("dev_id").get_int64();
+  int port_id = (int)local_node.get("port_id").get_int64();
+
   // std::string pm_file = pm_root + "pm_node" + std::to_string(machine_id); // Use fsdax
   std::string pm_file = pm_root;  // Use devdax
   size_t mem_size = (size_t)1024 * 1024 * 1024 * mem_size_GB;
@@ -298,7 +301,7 @@ int main(int argc, char* argv[]) {
   server->InitMem();
   server->LoadData(machine_id, machine_num, workload);
   server->SendMeta(machine_id, workload, compute_node_num);
-  server->InitRDMA();
+  server->InitRDMA(dev_id, port_id);
   bool run_next_round = server->Run();
 
   // Continue to run the next round. RDMA does not need to be inited twice

@@ -78,7 +78,7 @@ class Server {
 
   void InitMem();
 
-  void InitRDMA();
+  void InitRDMA(int, int);
 
   void LoadData(node_id_t machine_id, node_id_t machine_num, std::string& workload);
 

@@ -11,6 +11,9 @@ MetaManager::MetaManager() {
   auto json_config = JsonConfig::load_file(config_filepath);
   auto local_node = json_config.get("local_compute_node");
   local_machine_id = (node_id_t)local_node.get("machine_id").get_int64();
+  int dev_id = (int)local_node.get("dev_id").get_int64();
+  int port_id = (int)local_node.get("port_id").get_int64();
+
   txn_system = local_node.get("txn_system").get_int64();
   RDMA_LOG(INFO) << "Run " << (txn_system == 0 ? "FaRM" : (txn_system == 1 ? "DrTM+H" : (txn_system == 2 ? "FORD" : "FORD-LOCAL")));
 
@@ -39,8 +42,8 @@ MetaManager::MetaManager() {
 
   // Using the first RNIC's first port
   RdmaCtrl::DevIdx idx;
-  idx.dev_id = 2;
-  idx.port_id = 1;
+  idx.dev_id = dev_id;
+  idx.port_id = port_id;
 
   // Open device
   opened_rnic = global_rdma_ctrl->open_device(idx);

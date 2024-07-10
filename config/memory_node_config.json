@@ -8,7 +8,9 @@
     "mem_size_GB": 192,
     "log_buf_size_GB": 1,
     "pm_root": "/dev/dax0.1",
-    "workload": "TPCC"
+    "workload": "TPCC",
+    "dev_id": 3,
+    "port_id": 1
   },
   "remote_compute_nodes": {
     "compute_node_ips": ["192.168.1.1"],
